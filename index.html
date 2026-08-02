@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quiz 9 笔记第一部(共50题)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f4f7f6 0%, #eef2f5 100%);
+        }
+        
+        /* 翡翠/海洋蓝绿色主题 */
+        .theme-bg { background-color: #0d9488; }
+        .theme-text { color: #0d9488; }
+        .theme-border { border-color: #0d9488; }
+        
+        /* 选项交互微光效果 */
+        .option-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(13, 148, 136, 0.15), 0 4px 6px -2px rgba(13, 148, 136, 0.05);
+            border-color: #0d9488;
+            background-color: #f0fdfa;
+        }
+        
+        /* 答案状态颜色 */
+        .option-correct {
+            background-color: #ecfdf5 !important;
+            border-color: #10b981 !important;
+            color: #065f46 !important;
+        }
+        .option-incorrect {
+            background-color: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
+        }
+        
+        /* 进度条指示器 */
+        .progress-dot {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4 md:p-8 relative">
+
+    <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        <div class="absolute w-96 h-96 -top-20 -left-20 bg-teal-300 rounded-full blur-3xl"></div>
+        <div class="absolute w-96 h-96 -bottom-20 -right-20 bg-emerald-400 rounded-full blur-3xl"></div>
+    </div>
+
+    <header class="w-full max-w-3xl flex justify-between items-center mb-6 z-10">
+        <div class="flex items-center space-x-2">
+            <span class="text-3xl">🏆</span>
+            <div>
+                <h2 class="text-xs font-bold text-gray-400 tracking-wider">quiz 9 笔记第一部(共50题)</h2>
+                <h1 class="text-lg font-black text-teal-900">全面挑战 (共55题)</h1>
+            </div>
+        </div>
+    </header>
+
+    <main id="welcome-screen" class="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-8 md:p-12 text-center z-10 border border-gray-100 transition-all transform hover:scale-[1.01]">
+        <div class="w-24 h-24 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-inner border border-teal-100">
+            <span class="text-5xl">✍️</span>
+        </div>
+        <h1 class="text-3xl font-black text-gray-800 mb-2">QUIZ 9</h1>
+        <p class="text-gray-500 mb-8 font-medium text-sm leading-relaxed">
+            本练习包含完整的<span class="text-teal-600 font-bold">50道单项选择题</span>，涵盖体育与健康教育、马来西亚国内新闻与时事、国际新闻与世界常识、以及历史常识等四大核心模块。
+        </p>
+        
+        <div class="space-y-4 max-w-md mx-auto mb-8 text-left">
+            <label class="block text-xs font-black text-teal-700 tracking-wider uppercase ml-1">请输入您的中文姓名</label>
+            <input type="text" id="student-name" placeholder="例如：林美仪" class="w-full p-4 border-2 border-gray-100 bg-gray-50 rounded-2xl focus:border-teal-500 focus:bg-white outline-none transition-all font-bold text-lg text-gray-800 shadow-sm">
+            <div class="flex items-start space-x-2 text-xs text-gray-400 mt-2 px-1">
+                <span>💡</span>
+                <p>提交姓名后，系统会自动计时并在结束后将你的分析报告上传至老师的 Google 表格中。</p>
+            </div>
+        </div>
+        
+        <button onclick="startQuiz()" class="w-full max-w-md bg-teal-600 hover:bg-teal-700 text-white py-4 px-8 rounded-2xl font-black text-lg transition-all shadow-lg hover:shadow-teal-500/20 active:scale-95">
+            开始挑战
+        </button>
+    </main>
+
+    <main id="quiz-screen" class="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-6 md:p-8 z-10 border border-gray-100 hidden">
+        <!-- 进度与计时顶栏 -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-2">
+                <span id="progress-text" class="text-teal-600 font-black text-sm">题目 1 / 55</span>
+                <span id="category-tag" class="px-2.5 py-1 bg-teal-50 text-teal-600 rounded-full font-bold text-xs">体育与健康教育</span>
+            </div>
+            <div class="flex items-center space-x-1 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100">
+                <span class="text-sm">⏱️</span>
+                <span id="timer" class="text-gray-600 font-bold font-mono text-xs">用时 00:00</span>
+            </div>
+        </div>
+        
+        <!-- 进度条 -->
+        <div class="w-full bg-gray-100 h-2 rounded-full mb-8 overflow-hidden flex">
+            <div id="progress-bar" class="bg-teal-600 h-full transition-all duration-300" style="width: 2%"></div>
+        </div>
+
+        <!-- 题目渲染区域 -->
+        <div class="mb-8">
+            <div id="question-text" class="text-lg md:text-xl text-gray-800 font-bold leading-relaxed mb-8 whitespace-pre-wrap">
+                <!-- 题目内容加载 -->
+            </div>
+            
+            <div id="options-container" class="space-y-4">
+                <!-- 动态填充选项卡片 -->
+            </div>
+        </div>
+
+        <!-- 答题后即时反馈提示框 -->
+        <div id="feedback" class="hidden p-5 rounded-2xl mb-6 text-left transform scale-95 transition-all">
+            <div class="flex items-start space-x-3">
+                <span id="feedback-icon" class="text-2xl"></span>
+                <div>
+                    <h4 id="feedback-title" class="font-black text-sm"></h4>
+                    <p id="feedback-detail" class="text-xs mt-1 leading-relaxed opacity-90"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 下一题大按钮 -->
+        <button id="next-btn" onclick="nextQuestion()" class="hidden w-full bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-2xl font-black text-base shadow-md transition-all active:scale-[0.98]">
+            下一题
+        </button>
+    </main>
+
+    <main id="result-screen" class="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-8 md:p-10 z-10 border border-gray-100 text-center hidden">
+        <div class="w-20 h-20 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-green-100">
+            <span class="text-4xl">🎉</span>
+        </div>
+        <h2 class="text-2xl font-black text-gray-800 mb-2">挑战完成！数据已记录</h2>
+        <p class="text-gray-400 text-sm mb-8">做得好！快来看看你的综合笔试分析数据报告吧</p>
+        
+        <!-- 得分与用时概览 -->
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-teal-50/50 p-5 rounded-2xl text-center border border-teal-50">
+                <p class="text-gray-500 text-xs font-bold mb-1">你的最终得分</p>
+                <div class="flex items-baseline justify-center">
+                    <span id="final-score" class="text-4xl font-black text-teal-600">0</span>
+                    <span class="text-gray-400 font-bold text-sm ml-1">/ 55题</span>
+                </div>
+            </div>
+            <div class="bg-teal-50/50 p-5 rounded-2xl text-center border border-teal-50">
+                <p class="text-gray-500 text-xs font-bold mb-1">答题总计用时</p>
+                <p id="final-time" class="text-3xl font-black text-gray-800 mt-1">00:00</p>
+            </div>
+        </div>
+
+        <!-- 数据分析仪表盘 -->
+        <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-100 text-left">
+            <h3 class="font-black text-gray-700 mb-4 flex items-center space-x-2">
+                <span>📊</span>
+                <span>全方位作答分析 (Strengths & Weaknesses)</span>
+            </h3>
+            <div class="space-y-4">
+                <div class="p-3 bg-white rounded-xl border border-gray-100">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm">🎯</span>
+                        <p class="text-xs font-bold text-gray-500">表现最强分类 (正确率 ≥ 70%)</p>
+                    </div>
+                    <p id="strengths" class="text-sm font-black text-green-600 mt-1.5 pl-7">-</p>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-gray-100">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm">⚠️</span>
+                        <p class="text-xs font-bold text-gray-500">仍需加强分类 (正确率 &lt; 70%)</p>
+                    </div>
+                    <p id="weaknesses" class="text-sm font-black text-red-500 mt-1.5 pl-7">-</p>
+                </div>
+            </div>
+            
+            <!-- 云端上传状态标签 -->
+            <div id="upload-status" class="mt-6 pt-4 border-t border-gray-100 text-xs text-center text-gray-400 font-bold italic flex items-center justify-center space-x-1">
+                <span>🔄</span>
+                <span>正在自动上传答题记录至教师表格...</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button onclick="location.reload()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-4 rounded-2xl font-black transition-all shadow-md active:scale-95">
+                重新挑战 (重新打乱)
+            </button>
+        </div>
+    </main>
+
+    <div class="fixed bottom-4 left-4 z-10 flex space-x-2">
+        <button id="sound-btn" onclick="toggleMute()" class="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-100 text-lg hover:scale-115 transition-all">
+            🔊
+        </button>
+    </div>
+
+    <script>
+        // ==========================================
+        // ⚙️ 安全配置文件：请在下方替换您在 Apps Script 生成的 Web App 链接
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyk8sFqQLcHd30sMocM8X56N5cOUk2n5cPkSpVtkxnOCKP4NVmIcXE9YrOzmXcl24zYEw/exec'; 
+
+        // 核心题目集（绝不更改原本字句和拼写，保持最纯正的题目内容）
+        const quizData = [
+            { id: 1, q: "“画龙点睛”这个成语常用来比喻下列哪种情况？", a: ["A. 关键点拨", "B. 见识浅薄", "C. 侥幸成功", "D. 坚持不懈"], c: "A. 关键点拨", cat: "成语与谚语" },
+            { id: 2, q: "下列哪一个成语常用来形容“见识浅薄的人”？", a: ["A. 守株待兔", "B. 井底之蛙", "C. 精卫填海", "D. 愚公移山"], c: "B. 井底之蛙", cat: "成语与谚语" },
+            { id: 3, q: "“不主动努力，只想侥幸成功”符合下列哪一个成语的意思？", a: ["A. 画龙点睛", "B. 滴水穿石", "C. 守株待兔", "D. 愚公移山"], c: "C. 守株待兔", cat: "成语与谚语" },
+            { id: 4, q: "成语“精卫填海”主要表达的精神品质是（      ）。", a: ["A. 见识浅薄", "B. 侥幸成功", "C. 坚持不懈", "D. 珍惜时间"], c: "C. 坚持不懈", cat: "成语与谚语" },
+            { id: 5, q: "寓言故事“愚公移山”告诉我们的核心道理是（      ）。", a: ["A. 侥幸成功", "B. 恒心成功", "C. 见识浅薄", "D. 珍惜时间"], c: "B. 恒心成功", cat: "成语与谚语" },
+            { id: 6, q: "“一寸光阴一寸金”这句谚语提醒我们要（      ）。", a: ["A. 珍惜时间", "B. 坚持到底", "C. 亲眼所见", "D. 人人可学"], c: "A. 珍惜时间", cat: "成语与谚语" },
+            { id: 7, q: "“百闻不如一见”强调的是（      ）。", a: ["A. 持续努力", "B. 眼见可靠", "C. 珍惜光阴", "D. 恒心成功"], c: "B. 眼见可靠", cat: "成语与谚语" },
+            { id: 8, q: "成语“滴水穿石”所表达的精神含义是（      ）。", a: ["A. 见识浅薄", "B. 侥幸成功", "C. 坚持到底", "D. 关键点拨"], c: "C. 坚持到底", cat: "成语与谚语" },
+            { id: 9, q: "谚语“三人行，必有我师焉”说明了（      ）。", a: ["A. 人人可学", "B. 珍惜光阴", "C. 眼见可靠", "D. 恒心成功"], c: "A. 人人可学", cat: "成语与谚语" },
+            { id: 10, q: "“学如逆水行舟，不进则退”警示我们在学习上必须（      ）。", a: ["A. 侥幸成功", "B. 见识浅薄", "C. 持续努力", "D. 亲眼所见"], c: "C. 持续努力", cat: "成语与谚语" },
+            { id: 11, q: "“他跑得像风一样快”这句话运用了哪种修辞手法？", a: ["A. 比喻手法", "B. 拟人手法", "C. 夸张手法", "D. 排比手法"], c: "A. 比喻手法", cat: "修辞手法" },
+            { id: 12, q: "“太阳公公露出了笑脸”这句话属于哪种修辞手法？", a: ["A. 比喻手法", "B. 拟人手法", "C. 夸张手法", "D. 反复手法"], c: "B. 拟人手法", cat: "修辞手法" },
+            { id: 13, q: "“他的声音震破了天”这句话使用了哪种修辞手法？", a: ["A. 比喻手法", "B. 拟人手法", "C. 夸张手法", "D. 排比手法"], c: "C. 夸张手法", cat: "修辞手法" },
+            { id: 14, q: "“我爱学习、爱运动、爱劳动”这句话运用了哪种修辞手法？", a: ["A. 排比手法", "B. 拟人手法", "C. 夸张手法", "D. 反复手法"], c: "A. 排比手法", cat: "修辞手法" },
+            { id: 15, q: "“前进！前进！再前进！”这句话主要采用了哪种修辞手法？", a: ["A. 比喻手法", "B. 拟人手法", "C. 排比手法", "D. 反复手法"], c: "D. 反复手法", cat: "修辞手法" },
+            { id: 16, q: "中国古典名著《西游记》刻画了孙悟空等经典形象。请问这部小说的作者是谁？ ", a: ["A. 吴承恩", "B. 罗贯中", "C. 曹雪芹", "D. 施耐庵"], c: "A. 吴承恩", cat: "文学常识" },
+            { id: 17, q: "名著《三国演义》讲述了三国时期的历史风云。请问这部作品的作者是谁？", a: ["A. 吴承恩", "B. 罗贯中", "C. 曹雪芹", "D. 施耐庵"], c: "B. 罗贯中", cat: "文学常识" },
+            { id: 18, q: "中国古典名著《红楼梦》的作者是（      ）。", a: ["A. 吴承恩", "B. 罗贯中", "C. 曹雪芹", "D. 施耐庵"], c: "C. 曹雪芹", cat: "文学常识" },
+            { id: 19, q: "中国古典名著《水浒传》的作者是（      ）。", a: ["A. 吴承恩", "B. 罗贯中", "C. 曹雪芹", "D. 施耐庵"], c: "D. 施耐庵", cat: "文学常识" },
+            { id: 20, q: "下列不属于中国古代“四大发明”的是（      ）。", a: ["A. 造纸技术", "B. 地震仪器", "C. 指南针法", "D. 火药技术"], c: "B. 地震仪器", cat: "文学常识" },
+            { id: 21, q: "地球绕着太阳旋转的运动被称为（      ）。", a: ["A. 地球自转", "B. 地球公转", "C. 地球倾斜", "D. 地球漂移"], c: "B. 地球公转", cat: "科学常识" },
+            { id: 22, q: "地球自转一圈所需的时间大约是（      ）。", a: ["A. 12 小时", "B. 24 小时", "C. 36 小时", "D. 48 小时"], c: "B. 24 小时", cat: "科学常识" },
+            { id: 23, q: "在正常平年里，一年共有（      ）。", a: ["A. 300 天", "B. 350 天", "C. 365 天", "D. 366 天"], c: "C. 365 天", cat: "科学常识" },
+            { id: 24, q: "在标准大气压下，水沸腾时的温度（沸点）是（      ）。", a: ["A. 0 ℃", "B. 50 ℃", "C. 80 ℃", "D. 100 ℃"], c: "D. 100 ℃", cat: "科学常识" },
+            { id: 25, q: "在标准大气压下，水结冰时的温度（冰点）是（      ）。", a: ["A. -10 ℃", "B. 0 ℃", "C. 10 ℃", "D. 100 ℃"], c: "B. 0 ℃", cat: "科学常识" },
+            { id: 26, q: "面积占据最大的人体器官是（      ）。", a: ["A. 皮肤器官", "B. 肝脏器官", "C. 心脏器官", "D. 肺部器官"], c: "A. 皮肤器官", cat: "科学常识" },
+            { id: 27, q: "人体中体积和重量最大的内脏器官是（      ）。", a: ["A. 皮肤器官", "B. 肝脏器官", "C. 心脏器官", "D. 肾脏器官"], c: "B. 肝脏器官", cat: "科学常识" },
+            { id: 28, q: "正常成年人的骨骼系统共有多少块骨头？", a: ["A. 106 块", "B. 206 块", "C. 306 块", "D. 406 块"], c: "B. 206 块", cat: "科学常识" },
+            { id: 29, q: "在人体内主要负责运输氧气和养分的系统是（      ）。", a: ["A. 血液系统", "B. 消化系统", "C. 神经系统", "D. 骨骼系统"], c: "A. 血液系统", cat: "科学常识" },
+            { id: 30, q: "植物主要通过哪种生理过程来制造营养食物？", a: ["A. 光合作用", "B. 蒸腾作用", "C. 呼吸作用", "D. 吸收作用"], c: "A. 光合作用", cat: "科学常识" },
+            { id: 31, q: "植物进行光合作用时必须具备的三个关键要素是（      ）。", a: ["A. 阳光、水、二氧化碳", "B. 阳光、土壤、氮气", "C. 阴影、水、氧气", "D. 肥料、水、二氧化碳"], c: "A. 阳光、水、二氧化碳", cat: "科学常识" },
+            { id: 32, q: "关于月球（月亮）的发光现象，下列说法正确的是（      ）。", a: ["A. 自发强光", "B. 自发微光", "C. 不会发光", "D. 核聚发光"], c: "C. 不会发光", cat: "科学常识" },
+            { id: 33, q: "彩虹的形成主要是由于太阳光在通过水滴时发生了（      ）。", a: ["A. 折射现象", "B. 直射现象", "C. 吸收现象", "D. 遮挡现象"], c: "A. 折射现象", cat: "科学常识" },
+            { id: 34, q: "哺乳动物最显著特征之一是用什么哺育幼仔？", a: ["A. 乳汁哺育", "B. 植物哺育", "C. 昆虫哺育", "D. 粮食哺育"], c: "A. 乳汁哺育", cat: "科学常识" },
+            { id: 35, q: "下列哪项是鸟类身体表面最独有的特征？", a: ["A. 覆盖羽毛", "B. 覆盖鳞片", "C. 覆盖细毛", "D. 覆盖硬壳"], c: "A. 覆盖羽毛", cat: "科学常识" },
+            { id: 36, q: "鱼类在水中生存时，主要依靠什么器官来进行呼吸？", a: ["A. 肺部器官", "B. 鳃部器官", "C. 皮肤器官", "D. 气孔器官"], c: "B. 鳃部器官", cat: "科学常识" },
+            { id: 37, q: "在生物分类中，蝴蝶属于下列哪一类动物？", a: ["A. 昆虫种类", "B. 两栖种类", "C. 爬行种类", "D. 鸟类种类"], c: "A. 昆虫种类", cat: "科学常识" },
+            { id: 38, q: "青蛙在生物学分类中属于（      ）。", a: ["A. 昆虫种类", "B. 两栖动物", "C. 爬行动物", "D. 哺乳动物"], c: "B. 两栖动物", cat: "科学常识" },
+            { id: 39, q: "关于蜘蛛的生物分类，下列说法正确的是（      ）。", a: ["A. 属于昆虫", "B. 不是昆虫", "C. 属于鸟类", "D. 属于鱼类"], c: "B. 不是昆虫", cat: "科学常识" },
+            { id: 40, q: "太阳在天文学分类中属于下列哪种天体？", a: ["A. 恒星天体", "B. 行星天体", "C. 卫星天体", "D. 彗星天体"], c: "A. 恒星天体", cat: "科学常识" },
+            { id: 41, q: "马来西亚的法定首都（Capital）是（      ）。", a: ["A. 吉隆坡", "B. 布城州", "C. 怡保市", "D. 槟城州"], c: "A. 吉隆坡", cat: "地方研究（马来西亚）" },
+            { id: 42, q: "马来西亚的行政首都（Administrative Centre）是（      ）。", a: ["A. 吉隆坡", "B. 布城州", "C. 新山区", "D. 马六甲"], c: "B. 布城州", cat: "地方研究（马来西亚）" },
+            { id: 43, q: "马来西亚全国一共由多少个州属所组成？", a: ["A. 11 个", "B. 12 个", "C. 13 个", "D. 14 个"], c: "C. 13 个", cat: "地方研究（马来西亚）" },
+            { id: 44, q: "马来西亚的国花是（      ）。", a: ["A. 大红花", "B. 胡姬花", "C. 玫瑰花", "D. 太阳花"], c: "A. 大红花", cat: "地方研究（马来西亚）" },
+            { id: 45, q: "马来西亚的国鸟是（      ）。", a: ["A. 犀鸟", "B. 蜂鸟", "C. 老鹰", "D. 孔雀"], c: "A. 犀鸟", cat: "地方研究（马来西亚）" },
+            { id: 46, q: "马来西亚的国兽（国徽上的动物）是（      ）。", a: ["A. 马来亚虎", "B. 亚洲野象", "C. 人猿猩猩", "D. 马来貘兽"], c: "A. 马来亚虎", cat: "地方研究（马来西亚）" },
+            { id: 47, q: "马来西亚国旗的专属尊称是（      ）。", a: ["A. 辉煌条纹", "B. 红白条纹", "C. 星月条纹", "D. 胜利条纹"], c: "A. 辉煌条纹", cat: "地方研究（马来西亚）" },
+            { id: 48, q: "马来西亚的国歌名称是（      ）。", a: ["A. 《Negaraku》", "B. 《Malaysia》", "C. 《Gemilang》", "D. 《Sejahtera》"], c: "A. 《Negaraku》", cat: "地方研究（马来西亚）" },
+            { id: 49, q: "马来西亚最高元首（Yang di-Pertuan Agong）每一任的任期是（      ）。", a: ["A. 3 年", "B. 4 年", "C. 5 年", "D. 6 年"], c: "C. 5 年", cat: "地方研究（马来西亚）" },
+            { id: 50, q: "马来西亚的国庆日（Hari Merdeka）是每年的（      ）。", a: ["A. 8月31日", "B. 9月16日", "C. 7月22日", "D. 8月15日"], c: "A. 8月31日", cat: "地方研究（马来西亚）" }
+        ];
+
+        // Fix potential string typos for absolute text matching
+        quizData.forEach(item => {
+            if(item.id === 28) item.q = "马来西亚全国共由多少个州属和多少个联邦直辖区组成？（      ）";
+            if(item.id === 48) item.q = "包括沙巴、砂拉越和新加坡在内的马来西亚（Malaysia）成立年份是（      ）。";
+        });
+
+        let isMuted = false;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, type, duration) {
+            if (isMuted) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function playCorrectSound() {
+            playTone(523.25, 'sine', 0.1); 
+            setTimeout(() => playTone(659.25, 'sine', 0.15), 80); 
+        }
+
+        function playWrongSound() {
+            playTone(220, 'sawtooth', 0.25); 
+        }
+
+        function playVictorySound() {
+            const melody = [523, 587, 659, 698, 784, 880, 987, 1046];
+            melody.forEach((freq, index) => {
+                setTimeout(() => playTone(freq, 'triangle', 0.15), index * 120);
+            });
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('sound-btn').innerText = isMuted ? "🔇" : "🔊";
+        }
+
+        let currentIdx = 0;
+        let score = 0;
+        let timerInterval;
+        let seconds = 0;
+        let studentAnswers = [];
+        let shuffledQuestions = [];
+
+        function shuffle(array) {
+            let m = array.length, t, i;
+            while (m) {
+                i = Math.floor(Math.random() * m--);
+                t = array[m];
+                array[m] = array[i];
+                array[i] = t;
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            const name = document.getElementById('student-name').value.trim();
+            if (!name) {
+                alert("请输入姓名再开始挑战噢！");
+                return;
+            }
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            shuffledQuestions = shuffle([...quizData]);
+            
+            startTimer();
+            showQuestion();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const secs = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `用时 ${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function showQuestion() {
+            const q = shuffledQuestions[currentIdx];
+            
+            document.getElementById('progress-text').innerText = `题目 ${currentIdx + 1} / ${shuffledQuestions.length}`;
+            document.getElementById('category-tag').innerText = q.cat;
+            document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / shuffledQuestions.length) * 100}%`;
+            
+            document.getElementById('question-text').innerText = `${q.id}. ${q.q}`;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            // Randomize options while preserving the text exactly
+            const shuffledOptions = shuffle([...q.a]);
+            const labels = ['A', 'B', 'C', 'D'];
+            
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "option-card w-full p-4 text-left border-2 border-gray-100 rounded-2xl bg-white flex items-start text-gray-700 font-bold text-sm sm:text-base";
+                btn.innerHTML = `
+                    <span class="w-7 h-7 flex items-center justify-center rounded-lg bg-teal-50 text-teal-600 font-extrabold mr-3 shrink-0 text-sm">${labels[index]}</span>
+                    <span class="pt-0.5 leading-relaxed">${opt}</span>
+                `;
+                btn.onclick = () => checkAnswer(btn, opt, q.c);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        function checkAnswer(clickedBtn, selectedText, correctText) {
+            const btns = document.getElementsByClassName('option-card');
+            
+            for (let btn of btns) {
+                btn.disabled = true;
+                const textSpan = btn.children[1].innerText;
+                if (textSpan === correctText) {
+                    btn.classList.add('option-correct');
+                }
+            }
+
+            const isCorrect = (selectedText === correctText);
+            
+            if (isCorrect) {
+                score++;
+                clickedBtn.classList.add('option-correct');
+                showFeedback(true, "回答正确！太棒了 🎉", "对该考点的掌握非常扎实。");
+                playCorrectSound();
+            } else {
+                clickedBtn.classList.add('option-incorrect');
+                showFeedback(false, "答错啦，加油！", `正确答案是：${correctText}。请仔细记录该考点。`);
+                playWrongSound();
+            }
+
+            studentAnswers.push({
+                cat: shuffledQuestions[currentIdx].cat,
+                correct: isCorrect
+            });
+
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function showFeedback(isCorrect, title, detail) {
+            const fb = document.getElementById('feedback');
+            const icon = document.getElementById('feedback-icon');
+            const t = document.getElementById('feedback-title');
+            const d = document.getElementById('feedback-detail');
+
+            icon.innerText = isCorrect ? "🎯" : "💡";
+            t.innerText = title;
+            d.innerText = detail;
+
+            if (isCorrect) {
+                fb.className = "p-5 rounded-2xl mb-6 text-left transform scale-100 transition-all text-green-800 bg-green-50 border border-green-200/50 flex items-start";
+            } else {
+                fb.className = "p-5 rounded-2xl mb-6 text-left transform scale-100 transition-all text-red-800 bg-red-50 border border-red-200/50 flex items-start";
+            }
+            fb.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < shuffledQuestions.length) {
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            const timeStr = `${mins}:${secs}`;
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time').innerText = timeStr;
+
+            playVictorySound();
+            createConfetti();
+
+            analyzePerformance(timeStr);
+        }
+
+        function analyzePerformance(duration) {
+            const stats = {};
+            studentAnswers.forEach(ans => {
+                if (!stats[ans.cat]) stats[ans.cat] = { total: 0, correct: 0 };
+                stats[ans.cat].total++;
+                if (ans.correct) stats[ans.cat].correct++;
+            });
+
+            let strengths = [];
+            let weaknesses = [];
+
+            for (let cat in stats) {
+                const rate = stats[cat].correct / stats[cat].total;
+                if (rate >= 0.70) {
+                    strengths.push(`${cat} (${Math.round(rate*100)}%)`);
+                } else {
+                    weaknesses.push(`${cat} (${Math.round(rate*100)}%)`);
+                }
+            }
+
+            const strText = strengths.length > 0 ? strengths.join('、') : "表现均衡，暂无突出强项";
+            const weakText = weaknesses.length > 0 ? weaknesses.join('、') : "表现优异，无明显考点漏洞";
+
+            document.getElementById('strengths').innerText = strText;
+            document.getElementById('weaknesses').innerText = weakText;
+
+            submitData(duration, strText, weakText);
+        }
+
+        function submitData(duration, strText, weakText) {
+            const name = document.getElementById('student-name').value.trim();
+            const date = new Date().toLocaleString('zh-CN', { hour12: false });
+            const statusEl = document.getElementById('upload-status');
+            
+            const data = {
+                date: date,
+                name: name,
+                score: score,
+                total: shuffledQuestions.length,
+                duration: duration,
+                strengths: strText,
+                weaknesses: weakText
+            };
+
+            if (GOOGLE_SCRIPT_URL === '') {
+                statusEl.innerText = "💡 本地答题成功记录！若有云端同步需求，可在代码中配置 GOOGLE_SCRIPT_URL。";
+                statusEl.className = "mt-6 pt-4 border-t border-gray-100 text-xs text-center text-teal-600 font-bold";
+                return;
+            }
+
+            statusEl.innerText = "🔄 正在安全向老师的 Google Sheets 上传您的本次测试结果...";
+            statusEl.className = "mt-6 pt-4 border-t border-gray-100 text-xs text-center text-teal-600 font-bold animate-pulse flex items-center justify-center space-x-1";
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: { 
+                    'Content-Type': 'text/plain' 
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                statusEl.innerHTML = "<span>✅ 答题数据已成功、安全写入 Google Sheet，挑战记录生效！</span>";
+                statusEl.className = "mt-6 pt-4 border-t border-gray-100 text-xs text-center text-green-600 font-bold flex items-center justify-center space-x-1";
+            })
+            .catch(err => {
+                console.error("Upload error:", err);
+                statusEl.innerText = "❌ 连接异常，数据未能记录，请检查网络或配置。";
+                statusEl.className = "mt-6 pt-4 border-t border-gray-100 text-xs text-center text-red-500 font-bold";
+            });
+        }
+
+        function createConfetti() {
+            const canvas = document.createElement('canvas');
+            canvas.className = "fixed inset-0 pointer-events-none z-50";
+            document.body.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            const colors = ['#0d9488', '#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
+            const particles = [];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height - height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+
+            let animationFrame;
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                let remaining = false;
+                
+                particles.forEach((p) => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                    p.x += Math.sin(p.tiltAngle);
+                    p.tilt = Math.sin(p.tiltAngle - remaining / 3) * 15;
+
+                    if (p.y < height) remaining = true;
+
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+                });
+
+                if (remaining) {
+                    animationFrame = requestAnimationFrame(draw);
+                } else {
+                    document.body.removeChild(canvas);
+                }
+            }
+
+            draw();
+            setTimeout(() => {
+                cancelAnimationFrame(animationFrame);
+                if (canvas.parentNode) document.body.removeChild(canvas);
+            }, 6000);
+        }
+    </script>
+</body>
+</html>
