@@ -258,12 +258,6 @@
             { id: 50, q: "马来西亚的国庆日（Hari Merdeka）是每年的（      ）。", a: ["A. 8月31日", "B. 9月16日", "C. 7月22日", "D. 8月15日"], c: "A. 8月31日", cat: "地方研究（马来西亚）" }
         ];
 
-        // Fix potential string typos for absolute text matching
-        quizData.forEach(item => {
-            if(item.id === 28) item.q = "马来西亚全国共由多少个州属和多少个联邦直辖区组成？（      ）";
-            if(item.id === 48) item.q = "包括沙巴、砂拉越和新加坡在内的马来西亚（Malaysia）成立年份是（      ）。";
-        });
-
         let isMuted = false;
         let audioCtx = null;
 
